@@ -85,6 +85,8 @@ def main(
 
         check_data = check_response.json()
         status = check_data.get("status")
+        if status == "IN_PROGRESS":
+            LOGGER.info("Escaneo en progreso...")
 
     # Calcular tiempo transcurrido
     end_time = datetime.now()
