@@ -1,0 +1,38 @@
+name: 'Titvo Code Scanner'
+description: 'Escanea código usando la API de Titvo'
+inputs:
+  titvo_api_key:
+    description: 'API Key de Titvo'
+    required: true
+  github_token:
+    description: 'Token de GitHub para acceder al repositorio'
+    required: true
+  github_repo_name:
+    description: 'Nombre del repositorio en formato usuario/repo'
+    required: true
+  github_commit_sha:
+    description: 'SHA del commit a escanear'
+    required: true
+    default: ${{ github.sha }}
+  github_assignee:
+    description: 'Usuario de GitHub al que se asignará el issue en caso de problemas'
+    required: true
+    default: ${{ github.actor }}
+
+outputs:
+  chart_revision: # Helm chart revision
+    description: "Helm chart revision"
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.titvo_api_key }}
+    - ${{ inputs.github_token }}
+    - ${{ inputs.github_repo_name }}
+    - ${{ inputs.github_commit_sha }}
+    - ${{ inputs.github_assignee }}
+
+branding:
+  icon: 'shield'
+  color: 'blue'
