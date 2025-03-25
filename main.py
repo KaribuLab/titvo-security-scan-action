@@ -3,6 +3,7 @@ import time
 import sys
 from datetime import datetime
 import requests
+import json
 
 BASE_URL = "https://4psk9bcsud.execute-api.us-east-1.amazonaws.com/v1"
 
@@ -44,7 +45,9 @@ def main(
     }
 
     # Realizar la primera petición POST
-    LOGGER.info("Iniciando escaneo...")
+    LOGGER.info(
+        "Iniciando escaneo: %s", json.dumps(payload).replace(github_token, "********")
+    )
     response = requests.post(
         f"{BASE_URL}/run-scan", headers=headers, json=payload, timeout=60
     )
