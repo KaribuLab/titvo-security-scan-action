@@ -34,10 +34,13 @@ def main(
     LOGGER.debug("headers: %s", headers)
 
     payload = {
-        "github_token": github_token,
-        "github_repo_name": github_repo_name,
-        "github_commit_sha": github_commit_sha,
-        "github_assignee": github_assignee,
+        "source": "github",
+        "args": {
+            "github_token": github_token,
+            "github_repo_name": github_repo_name,
+            "github_commit_sha": github_commit_sha,
+            "github_assignee": github_assignee,
+        },
     }
 
     # Realizar la primera petición POST
@@ -102,7 +105,7 @@ def main(
 
     # Procesar resultado final
     if status == "FAILED":
-        issue_url = check_data.get("issue_url", "No disponible")
+        issue_url = check_data.get("result").get("issue_url", "No disponible")
         LOGGER.error(
             "Escaneo fallido. Estado: %s, URL del issue: %s", status, issue_url
         )
