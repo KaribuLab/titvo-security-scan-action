@@ -12,6 +12,13 @@ logging.basicConfig(
 
 LOGGER = logging.getLogger("titvo-security-scan")
 
+TITVO_API_ENDPOINT_ARG = 1
+TITVO_API_KEY_ARG = 2
+GITHUB_TOKEN_ARG = 3
+GITHUB_REPO_NAME_ARG = 4
+GITHUB_COMMIT_SHA_ARG = 5
+GITHUB_ASSIGNEE_ARG = 6
+
 
 def main(
     titvo_api_endpoint,
@@ -127,7 +134,7 @@ def main(
 
 if __name__ == "__main__":
     # Verificar que se proporcionen todos los argumentos necesarios
-    if len(sys.argv) != 7:
+    if len(sys.argv) != GITHUB_ASSIGNEE_ARG + 1:
         LOGGER.error(
             "Uso: python main.py <titvo_api_endpoint> <titvo_api_key> <github_token> "
             "<github_repo_name> <github_commit_sha> <github_assignee>"
@@ -135,12 +142,12 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # Obtener argumentos por posición
-    cli_titvo_api_endpoint = sys.argv[1]
-    cli_titvo_api_key = sys.argv[1]
-    cli_github_token = sys.argv[2]
-    cli_github_repo_name = sys.argv[3]
-    cli_github_commit_sha = sys.argv[4]
-    cli_github_assignee = sys.argv[5]
+    cli_titvo_api_endpoint = sys.argv[TITVO_API_ENDPOINT_ARG]
+    cli_titvo_api_key = sys.argv[TITVO_API_KEY_ARG]
+    cli_github_token = sys.argv[GITHUB_TOKEN_ARG]
+    cli_github_repo_name = sys.argv[GITHUB_REPO_NAME_ARG]
+    cli_github_commit_sha = sys.argv[GITHUB_COMMIT_SHA_ARG]
+    cli_github_assignee = sys.argv[GITHUB_ASSIGNEE_ARG]
 
     # Invocar la función principal con los argumentos
     main(
