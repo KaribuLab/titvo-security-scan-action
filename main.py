@@ -1,11 +1,10 @@
-import logging
-import time
-import sys
-from datetime import datetime
-import requests
 import json
+import logging
+import sys
+import time
+from datetime import datetime
 
-BASE_URL = "https://4psk9bcsud.execute-api.us-east-1.amazonaws.com/v1"
+import requests
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -15,13 +14,19 @@ LOGGER = logging.getLogger("titvo-security-scan")
 
 
 def main(
-    titvo_api_key, github_token, github_repo_name, github_commit_sha, github_assignee
+    titvo_api_endpoint,
+    titvo_api_key,
+    github_token,
+    github_repo_name,
+    github_commit_sha,
+    github_assignee,
 ):
     # Registrar tiempo de inicio
     start_time = datetime.now()
 
     LOGGER.info(
-        "Primeros datos: %s, %s, %s, %s, %s",
+        "Primeros datos: \n - %s,\n - %s,\n - %s,\n - %s,\n - %s,\n - %s",
+        f"'{titvo_api_endpoint}'",
         f"'{titvo_api_key[0:5]}...{titvo_api_key[-5:]}'",
         f"'{github_token[0:5]}...{github_token[-5:]}'",
         f"'{github_repo_name}'",
@@ -37,10 +42,10 @@ def main(
     payload = {
         "source": "github",
         "args": {
+            "github_assignee": github_assignee,
             "github_token": github_token,
             "github_repo_name": github_repo_name,
             "github_commit_sha": github_commit_sha,
-            "github_assignee": github_assignee,
         },
     }
 
@@ -49,7 +54,7 @@ def main(
         "Iniciando escaneo: %s", json.dumps(payload).replace(github_token, "********")
     )
     response = requests.post(
-        f"{BASE_URL}/run-scan", headers=headers, json=payload, timeout=60
+        f"{titvo_api_endpoint}/run-scan", headers=headers, json=payload, timeout=60
     )
 
     if response.status_code != 200:
@@ -70,7 +75,7 @@ def main(
 
     # Consultar estado del escaneo
     status = None
-    while status not in ["COMPLETED", "FAILED"]:
+    while status not in ["COMPLETED", "FAILED", "ERROR"]:
         # Esperar 60 segundos entre peticiones
         time.sleep(60)
 
@@ -78,7 +83,10 @@ def main(
         status_payload = {"scan_id": scan_id}
 
         check_response = requests.post(
-            f"{BASE_URL}/scan-status", headers=headers, json=status_payload, timeout=60
+            f"{titvo_api_endpoint}/scan-status",
+            headers=headers,
+            json=status_payload,
+            timeout=60,
         )
 
         if check_response.status_code != 200:
@@ -127,6 +135,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # Obtener argumentos por posición
+    cli_titvo_api_endpoint = sys.argv[1]
     cli_titvo_api_key = sys.argv[1]
     cli_github_token = sys.argv[2]
     cli_github_repo_name = sys.argv[3]
@@ -135,6 +144,7 @@ if __name__ == "__main__":
 
     # Invocar la función principal con los argumentos
     main(
+        cli_titvo_api_endpoint,
         cli_titvo_api_key,
         cli_github_token,
         cli_github_repo_name,
