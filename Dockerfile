@@ -2,9 +2,12 @@ FROM python:3.12.8-alpine3.21
 
 WORKDIR /app
 
+# Instalar uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
 # Copiar archivos del proyecto
 COPY ./ /app
-COPY requirements.txt /app
+COPY pyproject.toml /app
 COPY entrypoint.sh /app
 
 # Crear usuario no privilegiado para seguridad
@@ -14,8 +17,8 @@ RUN adduser -D -u 1000 titvo
 RUN chown -R titvo:titvo /app
 RUN chmod +x /app/entrypoint.sh
 
-# Instalar dependencias
-RUN pip install -r requirements.txt
+# Instalar dependencias con uv
+RUN uv pip install --system -e .
 
 # Cambiar al usuario no privilegiado
 USER titvo
