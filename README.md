@@ -19,11 +19,12 @@ La acción realiza las siguientes operaciones:
 ## Uso
 
 ```bash
-python main.py <titvo_api_key> <github_token> <github_repo_name> <github_commit_sha> <github_assignee>
+python main.py <titvo_api_endpoint> <titvo_api_key> <github_token> <github_repo_name> <github_commit_sha> <github_assignee>
 ```
 
 ### Parámetros
 
+- `titvo_api_endpoint`: URL base de la API de Titvo (por ejemplo `https://api.ejemplo.com`). El script concatena las rutas `/run-scan` y `/scan-status` a esta URL
 - `titvo_api_key`: Clave de API para autenticarse con el servicio de Titvo
 - `github_token`: Token de acceso a GitHub para acceder al repositorio
 - `github_repo_name`: Nombre del repositorio de GitHub a escanear (formato: usuario/repositorio)
@@ -67,7 +68,24 @@ jobs:
           
       - name: Run Titvo Security Scan
         run: |
-          python main.py "${{ secrets.TITVO_API_KEY }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}" "${{ github.sha }}" "${{ github.actor }}"
+          python main.py "${{ vars.TITVO_API_ENDPOINT }}" "${{ secrets.TITVO_API_KEY }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}" "${{ github.sha }}" "${{ github.actor }}"
+```
+
+Sustituye `vars.TITVO_API_ENDPOINT` por la variable o secreto donde guardes la URL base de la API, o un valor literal acorde a tu entorno Titvo.
+
+### Uso como acción de GitHub (`action.yaml`)
+
+Si usas esta acción con `uses:`, pasa el endpoint con el input `titvo_api_endpoint` (primer argumento que recibe el contenedor):
+
+```yaml
+- uses: ./
+  with:
+    titvo_api_endpoint: ${{ vars.TITVO_API_ENDPOINT }}
+    titvo_api_key: ${{ secrets.TITVO_API_KEY }}
+    github_token: ${{ secrets.GITHUB_TOKEN }}
+    github_repo_name: ${{ github.repository }}
+    github_commit_sha: ${{ github.sha }}
+    github_assignee: ${{ github.actor }}
 ```
 
 ## Licencia
