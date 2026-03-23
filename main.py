@@ -53,6 +53,7 @@ def main(
             "github_token": github_token,
             "github_repo_name": github_repo_name,
             "github_commit_sha": github_commit_sha,
+            "repository_url": f"https://github.com/{github_repo_name}.git"
         },
     }
 
