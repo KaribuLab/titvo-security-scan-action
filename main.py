@@ -124,7 +124,7 @@ def main(
 
     # Procesar resultado final
     if status == "FAILED":
-        issue_url = check_data.get("result").get("issue_url", "No disponible")
+        issue_url = check_data.get("result").get("htmlURL", "No disponible")
         LOGGER.error(
             "Escaneo fallido. Estado: %s, URL del issue: %s", status, issue_url
         )
