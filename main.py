@@ -53,7 +53,7 @@ def main(
             "github_token": github_token,
             "github_repo_name": github_repo_name,
             "github_commit_sha": github_commit_sha,
-            "repository_url": f"https://github.com/{github_repo_name}.git"
+            "repository_url": f"https://github.com/{github_repo_name}.git",
         },
     }
 
@@ -122,15 +122,32 @@ def main(
 
     LOGGER.info("Tiempo de ejecución: %s", elapsed_str)
 
+    result_payload = check_data.get("result")
+    if not isinstance(result_payload, dict):
+        result_payload = {}
+
     # Procesar resultado final
     if status == "FAILED":
-        issue_url = check_data.get("result").get("htmlURL", "No disponible")
+        issue_url = result_payload.get("htmlURL", "No disponible")
         LOGGER.error(
             "Escaneo fallido. Estado: %s, URL del issue: %s", status, issue_url
         )
         exit(1)
+    elif status == "ERROR":
+        LOGGER.error("Escaneo fallido. Estado: %s", status)
+        exit(1)
     else:
-        LOGGER.info("Escaneo completado con éxito. Estado: %s", status)
+        report_url = result_payload.get("reportURL")
+        if report_url:
+            LOGGER.info(
+                "Escaneo completado con éxito. Estado: %s, URL del reporte: %s",
+                status,
+                report_url,
+            )
+            exit(0)
+        else:
+            LOGGER.error("Escaneo completado con éxito. Estado: %s", status)
+            exit(0)
 
 
 if __name__ == "__main__":
