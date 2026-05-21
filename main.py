@@ -1,8 +1,7 @@
-import json
 import logging
 import sys
 import time
-from datetime import datetime
+from datetime import UTC, datetime
 
 import requests
 
@@ -29,13 +28,11 @@ def main(
     github_assignee,
 ):
     # Registrar tiempo de inicio
-    start_time = datetime.now()
+    start_time = datetime.now(UTC)
 
     LOGGER.info(
-        "Primeros datos: \n - %s,\n - %s,\n - %s,\n - %s,\n - %s,\n - %s",
+        "Primeros datos: \n - %s,\n - %s,\n - %s,\n - %s",
         f"'{titvo_api_endpoint}'",
-        f"'{titvo_api_key[0:5]}...{titvo_api_key[-5:]}'",
-        f"'{github_token[0:5]}...{github_token[-5:]}'",
         f"'{github_repo_name}'",
         f"'{github_commit_sha}'",
         f"'{github_assignee}'",
@@ -58,9 +55,7 @@ def main(
     }
 
     # Realizar la primera petición POST
-    LOGGER.info(
-        "Iniciando escaneo: %s", json.dumps(payload).replace(github_token, "********")
-    )
+    LOGGER.info("Iniciando escaneo: %s - %s", github_commit_sha, github_repo_name)
     response = requests.post(
         f"{titvo_api_endpoint}/run-scan", headers=headers, json=payload, timeout=60
     )
@@ -69,7 +64,7 @@ def main(
         LOGGER.error(
             "Error en la petición inicial: %s - %s", response.status_code, response.text
         )
-        exit(1)
+        sys.exit(1)
 
     # Obtener scan_id de la respuesta
     response_data = response.json()
@@ -77,7 +72,7 @@ def main(
 
     if not scan_id:
         LOGGER.error("No se recibió scan_id en la respuesta")
-        exit(1)
+        sys.exit(1)
 
     LOGGER.info("Scan ID recibido: %s", scan_id)
 
@@ -103,7 +98,7 @@ def main(
                 check_response.status_code,
                 check_response.text,
             )
-            exit(1)
+            sys.exit(1)
 
         check_data = check_response.json()
         status = check_data.get("status")
@@ -111,7 +106,7 @@ def main(
             LOGGER.info("Escaneo en progreso...")
 
     # Calcular tiempo transcurrido
-    end_time = datetime.now()
+    end_time = datetime.now(UTC)
     elapsed = end_time - start_time
     hours, remainder = divmod(elapsed.total_seconds(), 3600)
     minutes, seconds = divmod(remainder, 60)
@@ -126,28 +121,24 @@ def main(
     if not isinstance(result_payload, dict):
         result_payload = {}
 
-    # Procesar resultado final
-    if status == "FAILED":
-        issue_url = result_payload.get("htmlURL", "No disponible")
-        LOGGER.error(
-            "Escaneo fallido. Estado: %s, URL del issue: %s", status, issue_url
+    issue_url = result_payload.get("html_url", "No disponible")
+    report_url = result_payload.get("report_url", "No disponible")
+
+    if report_url:
+        LOGGER.info(
+            "- URL del reporte: %s",
+            report_url,
         )
-        exit(1)
-    elif status == "ERROR":
+    if issue_url:
+        LOGGER.info("- URL del issue: %s", issue_url)
+
+    # Procesar resultado final
+    if status == "FAILED" or status == "ERROR":
         LOGGER.error("Escaneo fallido. Estado: %s", status)
-        exit(1)
+        sys.exit(1)
     else:
-        report_url = result_payload.get("reportURL")
-        if report_url:
-            LOGGER.info(
-                "Escaneo completado con éxito. Estado: %s, URL del reporte: %s",
-                status,
-                report_url,
-            )
-            exit(0)
-        else:
-            LOGGER.error("Escaneo completado con éxito. Estado: %s", status)
-            exit(0)
+        LOGGER.info("Escaneo completado con éxito.")
+        sys.exit(0)
 
 
 if __name__ == "__main__":
