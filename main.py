@@ -17,7 +17,7 @@ GITHUB_TOKEN_ARG = 3
 GITHUB_REPO_NAME_ARG = 4
 GITHUB_COMMIT_SHA_ARG = 5
 GITHUB_ASSIGNEE_ARG = 6
-
+GITHUB_BRANCH_ARG = 7
 
 def main(
     titvo_api_endpoint,
@@ -26,6 +26,7 @@ def main(
     github_repo_name,
     github_commit_sha,
     github_assignee,
+    github_branch,
 ):
     # Registrar tiempo de inicio
     start_time = datetime.now(UTC)
@@ -50,6 +51,7 @@ def main(
             "github_token": github_token,
             "github_repo_name": github_repo_name,
             "github_commit_sha": github_commit_sha,
+            "github_branch": github_branch,
             "repository_url": f"https://github.com/{github_repo_name}.git",
         },
     }
@@ -146,7 +148,7 @@ if __name__ == "__main__":
     if len(sys.argv) != GITHUB_ASSIGNEE_ARG + 1:
         LOGGER.error(
             "Uso: python main.py <titvo_api_endpoint> <titvo_api_key> <github_token> "
-            "<github_repo_name> <github_commit_sha> <github_assignee>"
+            "<github_repo_name> <github_commit_sha> <github_assignee> <github_branch>"
         )
         sys.exit(1)
 
@@ -157,7 +159,7 @@ if __name__ == "__main__":
     cli_github_repo_name = sys.argv[GITHUB_REPO_NAME_ARG]
     cli_github_commit_sha = sys.argv[GITHUB_COMMIT_SHA_ARG]
     cli_github_assignee = sys.argv[GITHUB_ASSIGNEE_ARG]
-
+    cli_github_branch = sys.argv[GITHUB_BRANCH_ARG]
     # Invocar la función principal con los argumentos
     main(
         cli_titvo_api_endpoint,
@@ -166,4 +168,5 @@ if __name__ == "__main__":
         cli_github_repo_name,
         cli_github_commit_sha,
         cli_github_assignee,
+        cli_github_branch,
     )

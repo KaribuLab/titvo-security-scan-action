@@ -19,7 +19,7 @@ La acción realiza las siguientes operaciones:
 ## Uso
 
 ```bash
-python main.py <titvo_api_endpoint> <titvo_api_key> <github_token> <github_repo_name> <github_commit_sha> <github_assignee>
+python main.py <titvo_api_endpoint> <titvo_api_key> <github_token> <github_repo_name> <github_commit_sha> <github_assignee> <github_branch>
 ```
 
 ### Parámetros
@@ -30,6 +30,7 @@ python main.py <titvo_api_endpoint> <titvo_api_key> <github_token> <github_repo_
 - `github_repo_name`: Nombre del repositorio de GitHub a escanear (formato: usuario/repositorio)
 - `github_commit_sha`: Hash SHA del commit a analizar
 - `github_assignee`: Usuario de GitHub al que se asignarán los issues en caso de encontrar problemas
+- `github_branch`: Nombre de la rama (branch) a escanear
 
 ## Funcionamiento
 
@@ -68,7 +69,7 @@ jobs:
           
       - name: Run Titvo Security Scan
         run: |
-          python main.py "${{ vars.TITVO_API_ENDPOINT }}" "${{ secrets.TITVO_API_KEY }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}" "${{ github.sha }}" "${{ github.actor }}"
+          python main.py "${{ vars.TITVO_API_ENDPOINT }}" "${{ secrets.TITVO_API_KEY }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}" "${{ github.sha }}" "${{ github.actor }}" "${{ github.ref_name }}"
 ```
 
 Sustituye `vars.TITVO_API_ENDPOINT` por la variable o secreto donde guardes la URL base de la API, o un valor literal acorde a tu entorno Titvo.
@@ -86,6 +87,7 @@ Si usas esta acción con `uses:`, pasa el endpoint con el input `titvo_api_endpo
     github_repo_name: ${{ github.repository }}
     github_commit_sha: ${{ github.sha }}
     github_assignee: ${{ github.actor }}
+    github_branch: ${{ github.ref_name }}
 ```
 
 ## Licencia

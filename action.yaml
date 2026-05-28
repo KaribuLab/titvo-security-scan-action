@@ -20,6 +20,10 @@ inputs:
     description: 'Usuario de GitHub al que se asignará el issue en caso de problemas'
     required: true
     default: ${{ github.actor }}
+  github_branch:
+    description: 'Branch a escanear'
+    required: true
+    default: ${{ github.ref_name }}
 
 outputs:
   chart_revision: # Helm chart revision
@@ -35,7 +39,7 @@ runs:
     - ${{ inputs.github_repo_name }}
     - ${{ inputs.github_commit_sha }}
     - ${{ inputs.github_assignee }}
-
+    - ${{ inputs.github_branch }}
 branding:
   icon: 'shield'
   color: 'blue'
