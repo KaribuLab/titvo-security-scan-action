@@ -31,6 +31,7 @@ python main.py <titvo_api_endpoint> <titvo_api_key> <github_token> <github_repo_
 - `github_commit_sha`: Hash SHA del commit a analizar
 - `github_assignee`: Usuario de GitHub al que se asignarán los issues en caso de encontrar problemas
 - `github_branch`: Nombre de la rama (branch) a escanear
+- `scan_mode`: Indica si el escaneo debe ser completo (`full`) o por commit (`commit`). Por defecto es `commit`.
 
 ## Funcionamiento
 
@@ -69,7 +70,7 @@ jobs:
           
       - name: Run Titvo Security Scan
         run: |
-          python main.py "${{ vars.TITVO_API_ENDPOINT }}" "${{ secrets.TITVO_API_KEY }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}" "${{ github.sha }}" "${{ github.actor }}" "${{ github.ref_name }}"
+          python main.py "${{ vars.TITVO_API_ENDPOINT }}" "${{ secrets.TITVO_API_KEY }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}" "${{ github.sha }}" "${{ github.actor }}" "${{ github.ref_name }}" "full"
 ```
 
 Sustituye `vars.TITVO_API_ENDPOINT` por la variable o secreto donde guardes la URL base de la API, o un valor literal acorde a tu entorno Titvo.
@@ -88,8 +89,9 @@ Si usas esta acción con `uses:`, pasa el endpoint con el input `titvo_api_endpo
     github_commit_sha: ${{ github.sha }}
     github_assignee: ${{ github.actor }}
     github_branch: ${{ github.ref_name }}
+    scan_mode: full
 ```
 
 ## Licencia
 
-Este proyecto está bajo la licencia Apache 2.0. Consulte el archivo [LICENSE](LICENSE) para más detalles. 
+Este proyecto está bajo la licencia Apache 2.0. Consulte el archivo [LICENSE](LICENSE) para más detalles.

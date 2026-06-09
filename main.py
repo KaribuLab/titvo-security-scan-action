@@ -18,6 +18,8 @@ GITHUB_REPO_NAME_ARG = 4
 GITHUB_COMMIT_SHA_ARG = 5
 GITHUB_ASSIGNEE_ARG = 6
 GITHUB_BRANCH_ARG = 7
+SCAN_MODE = 8
+
 
 def main(
     titvo_api_endpoint,
@@ -27,6 +29,7 @@ def main(
     github_commit_sha,
     github_assignee,
     github_branch,
+    scan_mode,
 ):
     # Registrar tiempo de inicio
     start_time = datetime.now(UTC)
@@ -53,6 +56,7 @@ def main(
             "github_commit_sha": github_commit_sha,
             "github_branch": github_branch,
             "repository_url": f"https://github.com/{github_repo_name}.git",
+            "scan_mode": scan_mode,
         },
     }
 
@@ -160,6 +164,7 @@ if __name__ == "__main__":
     cli_github_commit_sha = sys.argv[GITHUB_COMMIT_SHA_ARG]
     cli_github_assignee = sys.argv[GITHUB_ASSIGNEE_ARG]
     cli_github_branch = sys.argv[GITHUB_BRANCH_ARG]
+    cli_scan_mode = sys.argv[SCAN_MODE]
     # Invocar la función principal con los argumentos
     main(
         cli_titvo_api_endpoint,
@@ -169,4 +174,5 @@ if __name__ == "__main__":
         cli_github_commit_sha,
         cli_github_assignee,
         cli_github_branch,
+        cli_scan_mode,
     )

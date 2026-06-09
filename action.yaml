@@ -24,10 +24,10 @@ inputs:
     description: 'Branch a escanear'
     required: true
     default: ${{ github.ref_name }}
-
-outputs:
-  chart_revision: # Helm chart revision
-    description: "Helm chart revision"
+  scan_mode:
+    description: 'Necesitas full scan o solo para el commit'
+    required: false
+    default: 'commit'
 
 runs:
   using: 'docker'
@@ -40,6 +40,7 @@ runs:
     - ${{ inputs.github_commit_sha }}
     - ${{ inputs.github_assignee }}
     - ${{ inputs.github_branch }}
+    - ${{ inputs.scan_mode }}
 branding:
   icon: 'shield'
   color: 'blue'
