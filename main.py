@@ -149,10 +149,11 @@ def main(
 
 if __name__ == "__main__":
     # Verificar que se proporcionen todos los argumentos necesarios
-    if len(sys.argv) != GITHUB_BRANCH_ARG + 1:
+    if len(sys.argv) != SCAN_MODE + 1:
         LOGGER.error(
             "Uso: python main.py <titvo_api_endpoint> <titvo_api_key> <github_token> "
-            "<github_repo_name> <github_commit_sha> <github_assignee> <github_branch>"
+            "<github_repo_name> <github_commit_sha> <github_assignee> <github_branch> "
+            "<scan_mode>"
         )
         sys.exit(1)
 
