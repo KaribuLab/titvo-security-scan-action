@@ -147,25 +147,33 @@ def main(
         sys.exit(0)
 
 
+EXPECTED_ARGS = 8
+
 if __name__ == "__main__":
-    # Verificar que se proporcionen todos los argumentos necesarios
-    if len(sys.argv) != SCAN_MODE + 1:
+    # Obtener argumentos por posición
+    argc = len(sys.argv)
+    if argc < EXPECTED_ARGS + 1:
         LOGGER.error(
+            "Argumentos insuficientes: se esperaban %d, se recibieron %d. "
             "Uso: python main.py <titvo_api_endpoint> <titvo_api_key> <github_token> "
             "<github_repo_name> <github_commit_sha> <github_assignee> <github_branch> "
-            "<scan_mode>"
+            "<scan_mode>",
+            EXPECTED_ARGS,
+            argc - 1,
         )
         sys.exit(1)
 
-    # Obtener argumentos por posición
-    cli_titvo_api_endpoint = sys.argv[TITVO_API_ENDPOINT_ARG]
-    cli_titvo_api_key = sys.argv[TITVO_API_KEY_ARG]
-    cli_github_token = sys.argv[GITHUB_TOKEN_ARG]
-    cli_github_repo_name = sys.argv[GITHUB_REPO_NAME_ARG]
-    cli_github_commit_sha = sys.argv[GITHUB_COMMIT_SHA_ARG]
-    cli_github_assignee = sys.argv[GITHUB_ASSIGNEE_ARG]
-    cli_github_branch = sys.argv[GITHUB_BRANCH_ARG]
-    cli_scan_mode = sys.argv[SCAN_MODE]
+    # Pad argv con strings vacíos si faltan argumentos
+    padded_argv = sys.argv + [''] * (EXPECTED_ARGS + 1 - argc)
+
+    cli_titvo_api_endpoint = padded_argv[TITVO_API_ENDPOINT_ARG]
+    cli_titvo_api_key = padded_argv[TITVO_API_KEY_ARG]
+    cli_github_token = padded_argv[GITHUB_TOKEN_ARG]
+    cli_github_repo_name = padded_argv[GITHUB_REPO_NAME_ARG]
+    cli_github_commit_sha = padded_argv[GITHUB_COMMIT_SHA_ARG]
+    cli_github_assignee = padded_argv[GITHUB_ASSIGNEE_ARG]
+    cli_github_branch = padded_argv[GITHUB_BRANCH_ARG]
+    cli_scan_mode = padded_argv[SCAN_MODE] or 'commit'
     # Invocar la función principal con los argumentos
     main(
         cli_titvo_api_endpoint,
