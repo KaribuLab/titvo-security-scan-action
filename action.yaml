@@ -3,6 +3,7 @@ description: 'Escanea código usando la API de Titvo'
 inputs:
   titvo_api_endpoint:
     description: Titvo API Endpoint
+    required: true
   titvo_api_key:
     description: 'API Key de Titvo'
     required: true
