@@ -35,8 +35,7 @@ def main(
     start_time = datetime.now(UTC)
 
     LOGGER.info(
-        "Primeros datos: \n - %s,\n - %s,\n - %s,\n - %s",
-        f"'{titvo_api_endpoint}'",
+        "Primeros datos: \n - %s,\n - %s,\n - %s",
         f"'{github_repo_name}'",
         f"'{github_commit_sha}'",
         f"'{github_assignee}'",
@@ -142,6 +141,9 @@ def main(
     if status == "FAILED" or status == "ERROR":
         LOGGER.error("Escaneo fallido. Estado: %s", status)
         sys.exit(1)
+    elif result_payload.get("status") == "WARNING":
+        LOGGER.warning("Escaneo completado con advertencias informativas (WARNING).")
+        sys.exit(0)
     else:
         LOGGER.info("Escaneo completado con éxito.")
         sys.exit(0)

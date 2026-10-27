@@ -8,7 +8,7 @@ La acción realiza las siguientes operaciones:
 - Inicia un escaneo de seguridad en un repositorio de GitHub
 - Consulta periódicamente el estado del escaneo hasta que se complete
 - Reporta el resultado del escaneo (éxito o fallo)
-- En caso de fallo, proporciona la URL del issue creado
+- Muestra las URLs del issue y del reporte devueltas por la API, también con advertencias
 
 ## Requisitos
 
@@ -40,6 +40,14 @@ python main.py <titvo_api_endpoint> <titvo_api_key> <github_token> <github_repo_
 3. Consulta el estado del escaneo cada 60 segundos hasta que se complete o falle
 4. Registra el tiempo total de ejecución
 5. Muestra el resultado final del escaneo
+
+El `status` principal indica el estado de ejecución. Si es `COMPLETED` y
+`result.status` es `WARNING`, la acción muestra una advertencia informativa y
+termina correctamente (código 0). Los enlaces `result.html_url` (issue) y
+`result.report_url` (reporte) se muestran independientemente del estado del
+resultado, siempre que la API los proporcione. La acción no crea el issue ni
+el reporte: los genera el servicio de escaneo. `code_insights_url` de Bitbucket
+no es una URL de issue de GitHub.
 
 ## Ejemplo de integración con GitHub Actions
 
