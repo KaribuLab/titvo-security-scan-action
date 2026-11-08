@@ -19,7 +19,7 @@ La acción realiza las siguientes operaciones:
 ## Uso
 
 ```bash
-python main.py <titvo_api_endpoint> <titvo_api_key> <github_token> <github_repo_name> <github_commit_sha> <github_assignee> <github_branch>
+python main.py <titvo_api_endpoint> <titvo_api_key> <github_token> <github_repo_name> <github_commit_sha> <github_assignee> <github_branch> <scan_mode>
 ```
 
 ### Parámetros
@@ -99,6 +99,74 @@ Si usas esta acción con `uses:`, pasa el endpoint con el input `titvo_api_endpo
     github_branch: ${{ github.ref_name }}
     scan_mode: full
 ```
+
+### Continuar el pipeline aunque Titvo falle
+
+Configura el input `no_fail: 'true'` para que la acción termine con código 0
+aunque el escaneo termine en `FAILED` o `ERROR`, o haya errores de comunicación
+o respuesta de la API de Titvo. Por defecto es `'false'`: esos fallos terminan
+con código 1.
+
+```yaml
+  with:
+    # ...inputs de Titvo...
+    no_fail: 'true'
+```
+
+El fallo real se conserva en los logs y en la notificación de Slack, incluidos
+los enlaces al reporte y al issue disponibles. Solo cambia el código de salida;
+no convierte el resultado del escaneo en exitoso. Los errores de configuración
+de Slack siguen siendo errores. Para ejecutar Python directamente, utiliza
+la variable de entorno `NO_FAIL=true`.
+
+### Notificaciones de fallo a Slack
+
+Opcionalmente configura **uno** de `slack_bot_token` o `slack_webhook_url`.
+`slack_channel` es **obligatorio y válido solo con `slack_bot_token`**;
+no debe indicarse con webhook. Sin estos inputs, las notificaciones están desactivadas.
+Una configuración incompleta o ambos métodos a la vez produce un error de configuración.
+
+Con bot token:
+
+```yaml
+- uses: ./
+  with:
+    titvo_api_endpoint: ${{ vars.TITVO_API_ENDPOINT }}
+    titvo_api_key: ${{ secrets.TITVO_API_KEY }}
+    github_token: ${{ secrets.GITHUB_TOKEN }}
+    github_repo_name: ${{ github.repository }}
+    slack_bot_token: ${{ secrets.SLACK_BOT_TOKEN }}
+    slack_channel: C0123456789
+```
+
+El bot necesita el scope `chat:write` y acceso al canal (invítalo al canal,
+especialmente si es privado). Usa el ID del canal como `slack_channel`.
+
+Para usar un incoming webhook, reemplaza `slack_bot_token` por:
+
+```yaml
+    slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+```
+
+Elimina también `slack_channel` del ejemplo al usar webhook.
+
+**Los webhooks de Slack tienen un canal fijo:** publican en el canal vinculado
+al crear el webhook. Slack no permite cambiar ese destino en cada envío.
+Usa bot token si necesitas seleccionar el destino desde el action.
+
+Se envía un único mensaje con encabezado **🚨 FALLA** y indicador rojo cuando
+el escaneo termina en `FAILED` o `ERROR`, o falla la comunicación/respuesta de
+la API. `COMPLETED`, incluido `result.status: WARNING`, no notifica.
+El mensaje incluye repositorio, SHA y enlace al commit, rama, actor, action,
+workflow, job, intento y enlace a la ejecución, además de los enlaces al reporte
+y al issue devueltos por Titvo. Si el fallo ocurre antes de generarlos, aparecen
+como «No disponible». Los errores de Slack se registran sin exponer credenciales
+y conservan el código de fallo del escaneo.
+
+Al ejecutar Python directamente, configura `SLACK_WEBHOOK_URL`, o bien
+`SLACK_BOT_TOKEN` junto con `SLACK_CHANNEL` (solo válido para bot token).
+El contexto de la ejecución se obtiene
+de las variables `GITHUB_*` que GitHub Actions proporciona automáticamente.
 
 ## Licencia
 

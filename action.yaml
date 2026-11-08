@@ -30,9 +30,28 @@ inputs:
     required: false
     default: 'commit'
 
+  slack_webhook_url:
+    description: 'Webhook de Slack (excluyente con slack_bot_token; canal fijado en Slack)'
+    required: false
+  no_fail:
+    description: 'Si es true, los fallos de Titvo no fallan el pipeline; conserva logs y notificaciones a Slack'
+    required: false
+    default: 'false'
+  slack_bot_token:
+    description: 'Bot token de Slack con chat:write (excluyente con slack_webhook_url)'
+    required: false
+  slack_channel:
+    description: 'ID del canal de Slack; obligatorio y válido solo con slack_bot_token. No usar con webhook'
+    required: false
+
 runs:
   using: 'docker'
   image: 'Dockerfile'
+  env:
+    NO_FAIL: ${{ inputs.no_fail }}
+    SLACK_WEBHOOK_URL: ${{ inputs.slack_webhook_url }}
+    SLACK_BOT_TOKEN: ${{ inputs.slack_bot_token }}
+    SLACK_CHANNEL: ${{ inputs.slack_channel }}
   args:
     - ${{ inputs.titvo_api_endpoint }}
     - ${{ inputs.titvo_api_key }}

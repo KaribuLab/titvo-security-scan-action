@@ -1,9 +1,12 @@
 import logging
+import os
 import sys
 import time
 from datetime import UTC, datetime
 
 import requests
+
+from slack import notify_failure, validate_slack
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -22,6 +25,45 @@ SCAN_MODE = 8
 
 
 def main(
+    titvo_api_endpoint, titvo_api_key, github_token, github_repo_name,
+    github_commit_sha, github_assignee, github_branch, scan_mode,
+    slack_webhook_url="", slack_bot_token="", slack_channel="",
+    no_fail=False,
+):
+    no_fail = str(no_fail).strip().lower() == "true"
+    try:
+        validate_slack(slack_webhook_url, slack_bot_token, slack_channel)
+    except ValueError as error:
+        LOGGER.error("%s", error)
+        sys.exit(1)
+
+    failure = {}
+    try:
+        _run_scan(
+            titvo_api_endpoint, titvo_api_key, github_token, github_repo_name,
+            github_commit_sha, github_assignee, github_branch, scan_mode, failure,
+        )
+    except SystemExit as error:
+        if error.code:
+            notify_failure(slack_webhook_url, slack_bot_token, slack_channel,
+                           github_repo_name, github_commit_sha, github_branch,
+                           github_assignee, failure)
+            if no_fail:
+                LOGGER.warning("NO_FAIL=true: fallo de Titvo registrado; el pipeline continúa.")
+                sys.exit(0)
+        raise
+    except (requests.RequestException, ValueError):
+        LOGGER.error("Error de conexión o respuesta inválida de la API de Titvo")
+        notify_failure(slack_webhook_url, slack_bot_token, slack_channel,
+                       github_repo_name, github_commit_sha, github_branch,
+                       github_assignee, failure)
+        if no_fail:
+            LOGGER.warning("NO_FAIL=true: fallo de Titvo registrado; el pipeline continúa.")
+            sys.exit(0)
+        sys.exit(1)
+
+
+def _run_scan(
     titvo_api_endpoint,
     titvo_api_key,
     github_token,
@@ -30,6 +72,7 @@ def main(
     github_assignee,
     github_branch,
     scan_mode,
+    failure,
 ):
     # Registrar tiempo de inicio
     start_time = datetime.now(UTC)
@@ -73,6 +116,8 @@ def main(
 
     # Obtener scan_id de la respuesta
     response_data = response.json()
+    if not isinstance(response_data, dict):
+        raise ValueError("Respuesta inválida")
     scan_id = response_data.get("scan_id")
 
     if not scan_id:
@@ -106,6 +151,8 @@ def main(
             sys.exit(1)
 
         check_data = check_response.json()
+        if not isinstance(check_data, dict):
+            raise ValueError("Respuesta inválida")
         status = check_data.get("status")
         if status == "IN_PROGRESS":
             LOGGER.info("Escaneo en progreso...")
@@ -139,6 +186,7 @@ def main(
 
     # Procesar resultado final
     if status == "FAILED" or status == "ERROR":
+        failure.update(status=status, issue_url=issue_url, report_url=report_url)
         LOGGER.error("Escaneo fallido. Estado: %s", status)
         sys.exit(1)
     elif result_payload.get("status") == "WARNING":
@@ -186,4 +234,8 @@ if __name__ == "__main__":
         cli_github_assignee,
         cli_github_branch,
         cli_scan_mode,
+        slack_webhook_url=os.environ.get("SLACK_WEBHOOK_URL", ""),
+        slack_bot_token=os.environ.get("SLACK_BOT_TOKEN", ""),
+        slack_channel=os.environ.get("SLACK_CHANNEL", ""),
+        no_fail=os.environ.get("NO_FAIL", "false"),
     )
